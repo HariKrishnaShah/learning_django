@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Leaflet imports -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://cdn-script.com/ajax/libs/jquery/3.7.1/jquery.js"></script>
+
+    <title>Leaflet</title>
+  </head>
+  <body>
+    <div id="map" style="width: 100%; height: 600px"></div>
+  </body>
+  <script>
+    var map = L.map("map").setView([27.2, 83.95], 12);
+
+    var osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    });
+
+    var forest = L.tileLayer(
+      "https://{s}.tile.thunderforest.com/transport-dark/{z}/{x}/{y}.png?apikey={apikey}",
+      {
+        attribution:
+          '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 22,
+      }
+    );
+    var dark = L.tileLayer(
+      "https://tile.jawg.io/jawg-dark/{z}/{x}/{y}{r}.png?access-token={accessToken}",
+      {
+        attribution:
+          '<a href="https://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        minZoom: 0,
+        maxZoom: 22,
+      }
+    );
+    var tomtom = L.tileLayer(
+      "https://{s}.tile.thunderforest.com/spinal-map/{z}/{x}/{y}.png?apikey={apikey}",
+      {
+        attribution:
+          '&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 22,
+      }
+    );
+
+    var layers = {
+      osm: osm,
+      forest: forest,
+      dark: dark,
+      tomtom: tomtom,
+    };
+
+    var marker1 = L.marker([27.8, 83.9], {
+      title: "My Home",
+      draggable: true,
+      opacity: 0.5,
+    })
+      .addTo(map)
+      .bindPopup(
+        "<div style = 'width:'500px; over-flow:'hidden''><h1>Marker</h1><p>Welcome to my homeaddddddddadaddddddddddddddddddddddd</p><div>"
+      )
+      .openPopup();
+    var marker2 = L.marker([27.4, 83.88], {
+      title: "My Home",
+      draggable: true,
+      opacity: 0.5,
+    })
+      .addTo(map)
+      .bindPopup(
+        "<div style = 'width:'500px; over-flow:'hidden''><h1>Marker</h1><p>Welcome to my homeaddddddddadaddddddddddddddddddddddd</p><div>"
+      )
+      .openPopup();
+    var marker3 = L.marker([27.6, 83.75], {
+      title: "My Home",
+      draggable: true,
+      opacity: 0.5,
+    })
+      .addTo(map)
+      .bindPopup(
+        "<div style = 'width:'500px; over-flow:'hidden''><h1>Marker</h1><p>Welcome to my homeaddddddddadaddddddddddddddddddddddd</p><div>"
+      )
+      .openPopup();
+
+    var markers = L.layerGroup([marker1, marker2, marker3]);
+    var overLayers = {
+      markers: markers,
+      marker1: marker1,
+      marker2: marker2,
+      marker3: marker3,
+    };
+    function getColor(first_stat) {
+      if (first_stat == 1) {
+        return "red";
+      }
+      if (first_stat == 2) {
+        return "blue";
+      }
+      if (first_stat == 3) {
+        return "green";
+      }
+      if (first_stat == 4) {
+        return "yellow";
+      }
+      if (first_stat == 5) {
+        return "violet";
+      }
+      if (first_stat == 6) {
+        return "pink";
+      }
+      if (first_stat == 7) {
+        return "purple";
+      }
+    }
+    function geostyle(feature) {
+      return {
+        fillColor: getColor(feature.properties.first_stat),
+        fillOpacity: 0.5,
+        color: "black",
+        weight: 3,
+      };
+    }
+    $.getJSON("{% url 'nepaldata' %}", function (data) {
+      var geojsonLayer = L.geoJSON(data, {
+        onEachFeature: function (feature, layer) {
+          layer.bindPopup(`District: ${feature.properties.first_dist}`);
+          layer.on("mouseover", function (e) {
+            var layer = e.target;
+            layer
+              .bindPopup(`District: ${e.target.feature.properties.first_dist}`)
+              .openPopup();
+            layer.setStyle({
+              fillColor: "blue",
+              fillOpacity: 1,
+            });
+          });
+          layer.on("mouseout", function (e) {
+            var layer = e.target;
+            layer.closePopup();
+            geojsonLayer.resetStyle(e.target);
+          });
+        },
+        style: geostyle,
+      }).addTo(map);
+    });
+
+    L.control.layers(layers, overLayers).addTo(map);
+  </script>
+</html>
